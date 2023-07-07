@@ -1,0 +1,25 @@
+---
+
+- name: Check existence of ClickHouse systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
+  register: clickhouse_service_stat
+
+- when: clickhouse_service_stat.stat.exists | bool
+  block:
+    - name: Ensure ClickHouse systemd service is stopped
+      ansible.builtin.service:
+        name: "{{ clickhouse_identifier }}"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: Ensure ClickHouse systemd service does not exist
+      ansible.builtin.file:
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
+        state: absent
+
+    - name: Ensure ClickHouse path doesn't exist
+      ansible.builtin.file:
+        path: "{{ clickhouse_base_path }}"
+        state: absent

@@ -1,0 +1,20 @@
+---
+
+- block:
+    - when: clickhouse_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+
+    - when: clickhouse_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+  tags:
+    - setup-all
+    - setup-clickhouse
+    - install-all
+    - install-clickhouse
+
+- block:
+    - when: not clickhouse_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+  tags:
+    - setup-all
+    - setup-clickhouse

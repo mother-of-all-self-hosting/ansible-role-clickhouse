@@ -1,0 +1,67 @@
+---
+
+- name: Ensure ClickHouse paths exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: "{{ clickhouse_uid }}"
+    group: "{{ clickhouse_gid }}"
+  with_items:
+    - "{{ clickhouse_base_path }}"
+    - "{{ clickhouse_backups_path }}"
+    - "{{ clickhouse_bin_path }}"
+    - "{{ clickhouse_config_path }}"
+    - "{{ clickhouse_data_path }}"
+
+- name: Ensure ClickHouse support files created
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: "{{ clickhouse_uid }}"
+    group: "{{ clickhouse_gid }}"
+    mode: 0640
+  with_items:
+    - src: "{{ role_path }}/templates/env.j2"
+      dst: "{{ clickhouse_base_path }}/env"
+    - src: "{{ role_path }}/templates/config.yaml.j2"
+      dst: "{{ clickhouse_config_path }}/config.yaml"
+
+- name: Ensure ClickHouse scripts created
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/bin/{{ item }}.j2"
+    dest: "{{ clickhouse_bin_path }}/{{ item }}"
+    mode: 0750
+  with_items:
+    - cli
+
+- name: Ensure ClickHouse container image is pulled
+  community.docker.docker_image:
+    name: "{{ clickhouse_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ clickhouse_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else clickhouse_container_image_force_pull }}"
+  register: result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: result is not failed
+
+- name: Ensure ClickHouse container network is created
+  community.general.docker_network:
+    name: "{{ clickhouse_container_network }}"
+    driver: bridge
+
+- name: Ensure ClickHouse service installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/clickhouse.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
+    mode: 0640
+
+- name: Ensure managed ClickHouse databases prepared
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/util/prepare_managed_databases.yml"
+    apply:
+      tags:
+        - always
+  when: "clickhouse_managed_databases | length > 0"
+

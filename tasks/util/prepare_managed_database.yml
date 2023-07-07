@@ -1,0 +1,41 @@
+---
+
+# It'd be better if this is belonged to `validate_config.yml`, but it would have to be some loop-within-a-loop there,
+# and that's ugly. We also don't expect this to catch errors often. It's more of a defensive last-minute check.
+- name: Fail if managed database data appears invalid
+  ansible.builtin.fail:
+    msg: "Managed database definition ({{ managed_db }} lacks a required key: {{ item }}"
+  when: "item not in managed_db"
+  with_items: "{{ ['name', 'username', 'password'] }}"
+
+# The SQL statements that we'll run against ClickHouse are stored in a file that others can't read.
+# This file will be mounted into the container and fed to ClickHouse.
+# This way, we avoid passing sensitive data around in CLI commands that other users on the system can see.
+- name: Create managed database initialization SQL file for {{ managed_db.name }}
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/sql/init-managed-db-user-and-role.sql.j2"
+    dest: "/tmp/{{ clickhouse_identifier }}-init-managed-db-user-and-role.sql"
+    mode: 0600
+    owner: "{{ clickhouse_uid }}"
+    group: "{{ clickhouse_gid }}"
+
+- name: Execute ClickHouse managed database initialization SQL file for {{ managed_db.name }}
+  ansible.builtin.command:
+    cmd: >-
+      {{ devture_systemd_docker_base_host_command_docker }} run
+      --rm
+      --user={{ clickhouse_uid }}:{{ clickhouse_gid }}
+      --cap-drop=ALL
+      --network={{ clickhouse_container_network }}
+      --env-file={{ clickhouse_base_path }}/env
+      --mount type=bind,src=/tmp/{{ clickhouse_identifier }}-init-managed-db-user-and-role.sql,dst=/{{ clickhouse_identifier }}-init-managed-db-user-and-role.sql,ro
+      --entrypoint=/bin/sh
+      {{ clickhouse_container_image }}
+      -c
+      'clickhouse-client --host={{ clickhouse_identifier }} --queries-file {{ clickhouse_identifier }}-init-managed-db-user-and-role.sql'
+  changed_when: true
+
+- name: Delete managed database initialization SQL file for {{ managed_db.name }}
+  ansible.builtin.file:
+    path: /tmp/{{ clickhouse_identifier }}-init-managed-db-user-and-role.sql
+    state: absent

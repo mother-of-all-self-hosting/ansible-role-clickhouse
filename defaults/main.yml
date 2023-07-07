@@ -1,0 +1,91 @@
+---
+
+clickhouse_enabled: true
+
+# clickhouse_identifier controls the identifer of this ClickHouse instance, which influences:
+# - the default storage path
+# - the names of systemd services
+# - the names of various helper scripts
+# - the names of temporary files
+# - the name of the main container network
+clickhouse_identifier: clickhouse
+
+clickhouse_version: 23.6.1.1524
+
+clickhouse_uid: ''
+clickhouse_gid: ''
+
+clickhouse_base_path: "/{{ clickhouse_identifier }}"
+clickhouse_data_path: "{{ clickhouse_base_path }}/data"
+clickhouse_backups_path: "{{ clickhouse_base_path }}/backups"
+clickhouse_bin_path: "{{ clickhouse_base_path }}/bin"
+clickhouse_config_path: "{{ clickhouse_base_path }}/config"
+
+clickhouse_container_image_registry_prefix: docker.io/
+clickhouse_container_image: '{{ clickhouse_container_image_registry_prefix }}clickhouse/clickhouse-server:{{ clickhouse_container_image_tag }}'
+clickhouse_container_image_tag: "{{ clickhouse_version }}-alpine"
+clickhouse_container_image_force_pull: "{{ clickhouse_container_image.endswith(':latest') }}"
+
+clickhouse_container_network: "{{ clickhouse_identifier }}"
+
+# A list of additional container networks that the container would be connected to.
+# The role does not create these networks, so make sure they already exist.
+clickhouse_container_additional_networks: "{{ clickhouse_container_additional_networks_auto + clickhouse_container_additional_networks_custom }}"
+clickhouse_container_additional_networks_auto: []
+clickhouse_container_additional_networks_custom: []
+
+# Controls whether the ClickHouse container exposes its HTTP port (tcp/8123 in the container).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8123"), or empty string to not expose.
+clickhouse_container_http_host_bind_port: ''
+
+# Controls whether the ClickHouse container exposes its ClickHouse protocol port (tcp/9000 in the container).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:9000"), or empty string to not expose.
+clickhouse_container_clickhouse_host_bind_port: ''
+
+clickhouse_db_name: default
+clickhouse_root_username: default
+clickhouse_root_passsword: ''
+
+# A list of databases (and their credentials) that this role will create and manage on the server.
+#
+# `clickhouse_managed_databases_auto` is managed by the playbook.
+# Your own definitions should go into `clickhouse_managed_databases_custom`
+# See `clickhouse_managed_databases_custom` for the correct syntax.
+clickhouse_managed_databases: "{{ clickhouse_managed_databases_auto + clickhouse_managed_databases_custom }}"
+
+# Additional/managed database definitions managed by the playbook.
+# To add your own, use `clickhouse_managed_databases_custom`
+clickhouse_managed_databases_auto: []
+
+# Your own additional/managed database definitions.
+#
+# Also see:
+# - clickhouse_managed_databases_default_charset
+# - clickhouse_managed_databases_default_collation
+#
+# clickhouse_managed_databases_custom:
+#   - name: some_database
+#     username: some_username
+#     password: some_password
+#   - name: another_database
+#     username: another_username
+#     password: another_password
+clickhouse_managed_databases_custom: []
+
+clickhouse_managed_databases_default_charset: utf8mb4
+clickhouse_managed_databases_default_collation: utf8mb4_unicode_ci
+
+# The number of seconds to wait after starting the ClickHouse systemd service
+# and before trying to run queries for initializing managed databases/users against it.
+#
+# For most (subsequent) runs, ClickHouse would already be running, so no waiting will be happening at all.
+clickhouse_managed_databases_service_start_wait_timeout_seconds: 15
+
+clickhouse_systemd_services_to_stop_for_maintenance_list: []
+
+clickhouse_systemd_required_services_list: "{{ clickhouse_systemd_required_services_list_default + clickhouse_systemd_required_services_list_auto + clickhouse_systemd_required_services_list_custom }}"
+clickhouse_systemd_required_services_list_default: ['docker.service']
+clickhouse_systemd_required_services_list_auto: []
+clickhouse_systemd_required_services_list_custom: []
