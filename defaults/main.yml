@@ -46,6 +46,11 @@ clickhouse_container_http_host_bind_port: ''
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:9000"), or empty string to not expose.
 clickhouse_container_clickhouse_host_bind_port: ''
 
+# Controls how long to wait for the container to stop gracefully before killing it.
+# Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
+# we default to at least 30 seconds.
+clickhouse_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
+
 clickhouse_db_name: default
 clickhouse_root_username: default
 clickhouse_root_passsword: ''
