@@ -1,5 +1,7 @@
 ---
 
+# Project source code URL: https://github.com/ClickHouse/ClickHouse
+
 clickhouse_enabled: true
 
 # clickhouse_identifier controls the identifer of this ClickHouse instance, which influences:
