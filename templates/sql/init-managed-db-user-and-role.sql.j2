@@ -5,3 +5,5 @@ CREATE USER IF NOT EXISTS {{ managed_db.username }};
 ALTER USER {{ managed_db.username }} IDENTIFIED WITH plaintext_password BY '{{ managed_db.password }}';
 
 GRANT ALL ON {{ managed_db.name }}.* TO {{ managed_db.username }};
+
+{{ managed_db.additional_sql | default('') }}

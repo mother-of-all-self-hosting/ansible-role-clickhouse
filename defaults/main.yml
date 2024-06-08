@@ -76,9 +76,11 @@ clickhouse_managed_databases_auto: []
 #   - name: some_database
 #     username: some_username
 #     password: some_password
+#     additional_sql: ''
 #   - name: another_database
 #     username: another_username
 #     password: another_password
+#     additional_sql: 'GRANT SELECT ON system.replicas TO another_username; GRANT SELECT ON system.parts TO another_username;'
 clickhouse_managed_databases_custom: []
 
 clickhouse_managed_databases_default_charset: utf8mb4
