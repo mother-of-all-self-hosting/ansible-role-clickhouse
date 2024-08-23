@@ -12,11 +12,15 @@ Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ clickhouse_container_stop_grace_time_seconds }} {{ clickhouse_identifier }} 2>/dev/null'
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ clickhouse_identifier }} 2>/dev/null'
 
+{#
+CAP_SYS_NICE is required or ClickHouse fails with "get_mempolicy: Operation not permitted".
+#}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			--rm \
 			--name {{ clickhouse_identifier }} \
 			--log-driver=none \
 			--user={{ clickhouse_uid }}:{{ clickhouse_gid }} \
+			--cap-add=CAP_SYS_NICE \
 			--network={{ clickhouse_container_network }} \
 			{% if clickhouse_container_clickhouse_host_bind_port %}
 			-p {{ clickhouse_container_clickhouse_host_bind_port }}:8123 \
