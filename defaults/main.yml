@@ -12,7 +12,7 @@ clickhouse_enabled: true
 # - the name of the main container network
 clickhouse_identifier: clickhouse
 
-clickhouse_version: 24.8.4.13
+clickhouse_version: 25.2.2.39
 
 clickhouse_uid: ''
 clickhouse_gid: ''
