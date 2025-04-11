@@ -1,10 +1,49 @@
 ---
 
+logger:
+  level: {{ clickhouse_config_logger_level | to_json }}
+
+{% if not clickhouse_config_query_thread_log_enabled %}
+query_thread_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_query_thread_log_enabled %}
+query_thread_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_query_log_enabled %}
+query_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_text_log_enabled %}
+text_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_trace_log_enabled %}
+trace_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_metric_log_enabled %}
+metric_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_asynchronous_metric_log_enabled %}
+asynchronous_metric_log:
+  "@remove": remove
+{% endif %}
+
 storage_configuration:
   disks:
     backups:
       type: local
       path: /backups/
+
 backups:
   allowed_disk: backups
   allowed_path: /backup/

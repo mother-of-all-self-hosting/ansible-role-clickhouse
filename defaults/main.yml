@@ -98,3 +98,27 @@ clickhouse_systemd_required_services_list: "{{ clickhouse_systemd_required_servi
 clickhouse_systemd_required_services_list_default: ['docker.service']
 clickhouse_systemd_required_services_list_auto: []
 clickhouse_systemd_required_services_list_custom: []
+
+# Controls the `logger.level` configuration setting.
+# Known values:
+# - none (turns off logging)
+# - fatal
+# - critical
+# - error
+# - warning
+# - notice
+# - information
+# - debug
+# - trace
+# - test (not for production usage)
+clickhouse_config_logger_level: warning
+
+# Controls various other logging variables (see below).
+clickhouse_config_verbose_logging_enabled: false
+
+clickhouse_config_query_thread_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_query_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_text_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_trace_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_asynchronous_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
