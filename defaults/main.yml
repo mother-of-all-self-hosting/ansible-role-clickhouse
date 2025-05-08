@@ -58,7 +58,7 @@ clickhouse_container_additional_networks_custom: []
 
 # List of systemd services that the ClickHouse systemd service depends on
 clickhouse_systemd_required_services_list: "{{ clickhouse_systemd_required_services_list_default + clickhouse_systemd_required_services_list_auto + clickhouse_systemd_required_services_list_custom }}"
-clickhouse_systemd_required_services_list_default: ['docker.service']
+clickhouse_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 clickhouse_systemd_required_services_list_auto: []
 clickhouse_systemd_required_services_list_custom: []
 
