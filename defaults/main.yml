@@ -17,7 +17,7 @@ clickhouse_enabled: true
 # - the name of the main container network
 clickhouse_identifier: clickhouse
 
-# renovate: datasource=docker depName=clickhouse/clickhouse-server versioning=semver-coerced
+# renovate: datasource=docker depName=clickhouse/clickhouse-server
 clickhouse_version: 25.3.2.39
 
 clickhouse_uid: ''
