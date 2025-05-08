@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 ---
 
 # It'd be better if this is belonged to `validate_config.yml`, but it would have to be some loop-within-a-loop there,
