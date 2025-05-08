@@ -18,7 +18,7 @@ clickhouse_enabled: true
 clickhouse_identifier: clickhouse
 
 # renovate: datasource=docker depName=clickhouse/clickhouse-server versioning=semver-coerced
-clickhouse_version: 25.3.2.39
+clickhouse_version: 12334
 
 clickhouse_uid: ''
 clickhouse_gid: ''
