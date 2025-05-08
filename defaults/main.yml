@@ -1,5 +1,8 @@
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
 # SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
-# SPDX-FileCopyrightText: 2023 Nikita Chernyi
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -27,9 +30,11 @@ clickhouse_version: 25.3.2.39
 clickhouse_uid: ''
 clickhouse_gid: ''
 
-clickhouse_container_image_registry_prefix: docker.io/
-clickhouse_container_image: '{{ clickhouse_container_image_registry_prefix }}clickhouse/clickhouse-server:{{ clickhouse_container_image_tag }}'
+clickhouse_container_image: "{{ clickhouse_container_image_registry_prefix }}clickhouse/clickhouse-server:{{ clickhouse_container_image_tag }}"
 clickhouse_container_image_tag: "{{ clickhouse_version }}-alpine"
+clickhouse_container_image_registry_prefix: "{{ clickhouse_container_image_registry_prefix_upstream }}"
+clickhouse_container_image_registry_prefix_upstream: "{{ clickhouse_container_image_registry_prefix_upstream_default }}"
+clickhouse_container_image_registry_prefix_upstream_default: docker.io/
 clickhouse_container_image_force_pull: "{{ clickhouse_container_image.endswith(':latest') }}"
 
 # Controls whether the ClickHouse container exposes its HTTP port (tcp/8123 in the container).
