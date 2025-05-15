@@ -19,7 +19,7 @@
     - "{{ clickhouse_config_path }}"
     - "{{ clickhouse_data_path }}"
 
-- name: Ensure ClickHouse support files created
+- name: Ensure ClickHouse support files installed
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dst }}"
@@ -58,7 +58,7 @@
     driver: bridge
     driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
-- name: Ensure ClickHouse service installed
+- name: Ensure ClickHouse systemd service is present
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/clickhouse.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
@@ -71,4 +71,3 @@
       tags:
         - always
   when: "clickhouse_managed_databases | length > 0"
-
