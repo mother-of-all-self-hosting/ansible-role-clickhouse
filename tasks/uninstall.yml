@@ -23,7 +23,7 @@
         path: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
         state: absent
 
-    - name: Ensure ClickHouse path doesn't exist
+    - name: Ensure ClickHouse path does not exist
       ansible.builtin.file:
         path: "{{ clickhouse_base_path }}"
         state: absent
