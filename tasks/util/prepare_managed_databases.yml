@@ -26,7 +26,7 @@
   # Suppress logging to avoid dumping the credentials to the shell
   no_log: true
 
-- name: Ensure ClickHouse is stopped (if it previously was)
+- name: Ensure ClickHouse systemd service is stopped (if it previously was)
   when: clickhouse_ensure_started_result.changed | bool
   ansible.builtin.service:
     name: "{{ clickhouse_identifier }}"
