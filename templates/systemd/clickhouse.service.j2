@@ -34,10 +34,10 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			--cap-add=CAP_SYS_NICE \
 			--network={{ clickhouse_container_network }} \
 			{% if clickhouse_container_clickhouse_host_bind_port %}
-			-p {{ clickhouse_container_clickhouse_host_bind_port }}:8123 \
+			-p {{ clickhouse_container_clickhouse_host_bind_port }}:{{ clickhouse_container_clickhouse_port }} \
 			{% endif %}
 			{% if clickhouse_container_http_host_bind_port %}
-			-p {{ clickhouse_container_http_host_bind_port }}:8123 \
+			-p {{ clickhouse_container_http_host_bind_port }}:{{ clickhouse_container_http_port }} \
 			{% endif %}
 			--env-file={{ clickhouse_base_path }}/env \
 			--mount type=bind,src={{ clickhouse_data_path }},dst=/var/lib/clickhouse \
