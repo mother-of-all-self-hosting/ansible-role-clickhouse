@@ -27,24 +27,24 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 CAP_SYS_NICE is required or ClickHouse fails with "get_mempolicy: Operation not permitted".
 #}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name {{ clickhouse_identifier }} \
-			--log-driver=none \
-			--user={{ clickhouse_uid }}:{{ clickhouse_gid }} \
-			--cap-add=CAP_SYS_NICE \
-			--network={{ clickhouse_container_network }} \
-			{% if clickhouse_container_clickhouse_host_bind_port %}
-			-p {{ clickhouse_container_clickhouse_host_bind_port }}:{{ clickhouse_container_clickhouse_port }} \
-			{% endif %}
-			{% if clickhouse_container_http_host_bind_port %}
-			-p {{ clickhouse_container_http_host_bind_port }}:{{ clickhouse_container_http_port }} \
-			{% endif %}
-			--env-file={{ clickhouse_base_path }}/env \
-			--mount type=bind,src={{ clickhouse_data_path }},dst=/var/lib/clickhouse \
-			--mount type=bind,src={{ clickhouse_config_path }}/config.yaml,dst=/etc/clickhouse-server/config.d/config.yaml,ro \
-			--mount type=bind,src={{ clickhouse_backups_path }},dst=/backups \
-			--tmpfs=/tmp:rw,noexec,nosuid,size=512m \
-			{{ clickhouse_container_image }}
+      --rm \
+      --name {{ clickhouse_identifier }} \
+      --log-driver=none \
+      --user={{ clickhouse_uid }}:{{ clickhouse_gid }} \
+      --cap-add=CAP_SYS_NICE \
+      --network={{ clickhouse_container_network }} \
+      {% if clickhouse_container_clickhouse_host_bind_port %}
+      -p {{ clickhouse_container_clickhouse_host_bind_port }}:{{ clickhouse_container_clickhouse_port }} \
+      {% endif %}
+      {% if clickhouse_container_http_host_bind_port %}
+      -p {{ clickhouse_container_http_host_bind_port }}:{{ clickhouse_container_http_port }} \
+      {% endif %}
+      --env-file={{ clickhouse_base_path }}/env \
+      --mount type=bind,src={{ clickhouse_data_path }},dst=/var/lib/clickhouse \
+      --mount type=bind,src={{ clickhouse_config_path }}/config.yaml,dst=/etc/clickhouse-server/config.d/config.yaml,ro \
+      --mount type=bind,src={{ clickhouse_backups_path }},dst=/backups \
+      --tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+      {{ clickhouse_container_image }}
 
 {% for network in clickhouse_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ clickhouse_identifier }}
