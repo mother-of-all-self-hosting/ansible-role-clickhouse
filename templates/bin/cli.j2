@@ -7,12 +7,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 #!/bin/bash
 
 {{ devture_systemd_docker_base_host_command_docker }} run \
-	-it \
-	--rm \
-	--user={{ clickhouse_uid }}:{{ clickhouse_gid }} \
-	--cap-drop=ALL \
-	--env-file={{ clickhouse_base_path }}/env \
-	--network={{ clickhouse_container_network }} \
-	--entrypoint=/bin/sh \
-	{{ clickhouse_container_image }} \
-	-c 'clickhouse-client --host={{ clickhouse_identifier }}'
+  -it \
+  --rm \
+  --user={{ clickhouse_uid }}:{{ clickhouse_gid }} \
+  --cap-drop=ALL \
+  --env-file={{ clickhouse_base_path }}/env \
+  --network={{ clickhouse_container_network }} \
+  --entrypoint=/bin/sh \
+  {{ clickhouse_container_image }} \
+  -c 'clickhouse-client --host={{ clickhouse_identifier }}'
