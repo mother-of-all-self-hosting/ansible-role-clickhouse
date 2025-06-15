@@ -3,9 +3,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Fail if required ClickHouse settings not defined
-  fail:
+  ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item }}`) for using this role.
   when: "vars[item] == ''"
