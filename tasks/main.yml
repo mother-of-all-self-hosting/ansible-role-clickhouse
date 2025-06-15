@@ -3,27 +3,24 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Perform ClickHouse installation tasks
-  block:
-    - name: Validate ClickHouse configuration
-      when: clickhouse_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - name: Install ClickHouse
-      when: clickhouse_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+  when: clickhouse_enabled | bool
   tags:
     - setup-all
     - setup-clickhouse
     - install-all
     - install-clickhouse
+  block:
+    - name: Validate ClickHouse configuration
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install ClickHouse
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Perform ClickHouse uninstallation tasks
-  block:
-    - name: Uninstall ClickHouse
-      when: not clickhouse_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+  when: not clickhouse_enabled | bool
   tags:
     - setup-all
     - setup-clickhouse
+  block:
+    - name: Uninstall ClickHouse
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
