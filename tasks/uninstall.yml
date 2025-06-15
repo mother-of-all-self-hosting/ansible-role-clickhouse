@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Check existence of ClickHouse systemd service
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
   register: clickhouse_service_stat
 
-- when: clickhouse_service_stat.stat.exists | bool
+- name: Uninstall ClickHouse systemd services and files
+  when: clickhouse_service_stat.stat.exists | bool
   block:
     - name: Ensure ClickHouse systemd service is stopped
       ansible.builtin.service:
