@@ -11,7 +11,7 @@
 
 clickhouse_enabled: true
 
-# clickhouse_identifier controls the identifer of this ClickHouse instance, which influences:
+# clickhouse_identifier controls the identifier of this ClickHouse instance, which influences:
 # - the default storage path
 # - the names of systemd services
 # - the names of various helper scripts
