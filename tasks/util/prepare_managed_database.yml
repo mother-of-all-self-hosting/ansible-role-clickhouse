@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 # It'd be better if this is belonged to `validate_config.yml`, but it would have to be some loop-within-a-loop there,
 # and that's ugly. We also don't expect this to catch errors often. It's more of a defensive last-minute check.
 - name: Fail if managed database data appears invalid
@@ -19,7 +18,7 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/sql/init-managed-db-user-and-role.sql.j2"
     dest: "/tmp/{{ clickhouse_identifier }}-init-managed-db-user-and-role.sql"
-    mode: 0600
+    mode: "0600"
     owner: "{{ clickhouse_uid }}"
     group: "{{ clickhouse_gid }}"
 

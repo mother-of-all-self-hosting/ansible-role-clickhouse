@@ -4,12 +4,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Ensure ClickHouse paths exist
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: "{{ clickhouse_uid }}"
     group: "{{ clickhouse_gid }}"
   with_items:
@@ -25,7 +24,7 @@
     dest: "{{ item.dst }}"
     owner: "{{ clickhouse_uid }}"
     group: "{{ clickhouse_gid }}"
-    mode: 0640
+    mode: "0640"
   with_items:
     - src: "{{ role_path }}/templates/env.j2"
       dst: "{{ clickhouse_base_path }}/env"
@@ -36,7 +35,7 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/bin/{{ item }}.j2"
     dest: "{{ clickhouse_bin_path }}/{{ item }}"
-    mode: 0750
+    mode: "0750"
   with_items:
     - cli
 
@@ -86,7 +85,7 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/clickhouse.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
-    mode: 0644
+    mode: "0644"
 
 - name: Ensure managed ClickHouse databases prepared
   ansible.builtin.include_tasks:
