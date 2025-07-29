@@ -25,7 +25,7 @@ clickhouse_bin_path: "{{ clickhouse_base_path }}/bin"
 clickhouse_config_path: "{{ clickhouse_base_path }}/config"
 
 # renovate: datasource=docker depName=clickhouse/clickhouse-server
-clickhouse_version: 25.6.5.41
+clickhouse_version: 25.7.1.3997
 
 clickhouse_uid: ''
 clickhouse_gid: ''
