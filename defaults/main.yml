@@ -78,7 +78,7 @@ clickhouse_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_c
 
 clickhouse_db_name: default
 clickhouse_root_username: default
-clickhouse_root_passsword: ''
+clickhouse_root_password: ''
 
 # A list of databases (and their credentials) that this role will create and manage on the server.
 #
