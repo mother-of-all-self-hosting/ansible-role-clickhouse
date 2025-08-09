@@ -142,3 +142,6 @@ clickhouse_config_text_log_enabled: "{{ clickhouse_config_verbose_logging_enable
 clickhouse_config_trace_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 clickhouse_config_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 clickhouse_config_asynchronous_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+
+# Additional environment variables.
+clickhouse_environment_variables_additional_variables: ''
