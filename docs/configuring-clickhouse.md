@@ -78,6 +78,9 @@ After running the command for installation, the Clickhouse instance becomes avai
 
 You can use the CLI installed to the directory specified with `clickhouse_bin_path` (default: `/clickhouse/bin/`) for getting interactive terminal access to the ClickHouse server.
 
+>[!WARNING]
+> Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption. If you are not perfectly sure, create a backup!
+
 ### Backing up a database
 
 The directory specified with `clickhouse_backups_path` (default: `/clickhouse/backups/`) is mounted as `/backups` into the container and is an allowed disk for backups called `backups`.
