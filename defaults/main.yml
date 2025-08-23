@@ -69,7 +69,10 @@ clickhouse_systemd_required_services_list_auto: []
 clickhouse_systemd_required_services_list_custom: []
 
 # List of systemd services that the ClickHouse systemd service wants
-clickhouse_systemd_wanted_services_list: []
+clickhouse_systemd_wanted_services_list: "{{ clickhouse_systemd_wanted_services_list_default + clickhouse_systemd_wanted_services_list_auto + clickhouse_systemd_wanted_services_list_custom }}"
+clickhouse_systemd_wanted_services_list_default: []
+clickhouse_systemd_wanted_services_list_auto: []
+clickhouse_systemd_wanted_services_list_custom: []
 
 # Controls how long to wait for the container to stop gracefully before killing it.
 # Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
