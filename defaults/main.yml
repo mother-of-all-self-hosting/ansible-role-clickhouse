@@ -123,7 +123,7 @@ clickhouse_managed_databases_service_start_wait_timeout_seconds: 15
 clickhouse_systemd_services_to_stop_for_maintenance_list: []
 
 # Controls the `logger.level` configuration setting.
-# Known values:
+# Valid values:
 # - none (turns off logging)
 # - fatal
 # - critical

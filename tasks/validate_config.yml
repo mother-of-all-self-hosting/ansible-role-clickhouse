@@ -23,3 +23,9 @@
     - clickhouse_gid
     - clickhouse_container_network
     - clickhouse_root_password
+
+- name: Fail if ClickHouse logging level is invalid
+  ansible.builtin.fail:
+    msg: >-
+      clickhouse_config_logger_level must be 'none', 'fatal', 'critical', 'error', 'warning', 'notice', 'information', 'debug', 'trace', or 'test'
+  when: "clickhouse_config_logger_level not in ['none', 'fatal', 'critical', 'error', 'warning', 'notice', 'information', 'debug', 'trace', 'test']"
