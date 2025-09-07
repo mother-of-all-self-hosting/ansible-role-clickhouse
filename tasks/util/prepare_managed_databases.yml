@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Ensure ClickHouse is started
+- name: Ensure ClickHouse service is started
   ansible.builtin.service:
     name: "{{ clickhouse_identifier }}"
     state: started
