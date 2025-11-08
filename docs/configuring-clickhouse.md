@@ -40,7 +40,7 @@ To enable ClickHouse with this role, add the following configuration to your `va
 clickhouse_enabled: true
 
 # Put a strong password below, generated with `pwgen -s 64 1` or in another way
-clickhouse_root_password: ''
+clickhouse_root_password: ""
 
 ########################################################################
 #                                                                      #
