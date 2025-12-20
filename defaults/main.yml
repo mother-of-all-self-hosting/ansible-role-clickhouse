@@ -148,5 +148,8 @@ clickhouse_config_asynchronous_metric_log_enabled: "{{ clickhouse_config_verbose
 
 clickhouse_config_additional_configurations: ''
 
+# Specify the timezone
+clickhouse_environment_variables_tz: UTC
+
 # Additional environment variables.
 clickhouse_environment_variables_additional_variables: ''
