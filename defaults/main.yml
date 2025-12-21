@@ -27,8 +27,8 @@ clickhouse_config_path: "{{ clickhouse_base_path }}/config"
 # renovate: datasource=docker depName=clickhouse/clickhouse-server
 clickhouse_version: 25.12.1.649
 
-clickhouse_uid: ''
-clickhouse_gid: ''
+clickhouse_uid: ""
+clickhouse_gid: ""
 
 clickhouse_container_image: "{{ clickhouse_container_image_registry_prefix }}clickhouse/clickhouse-server:{{ clickhouse_container_image_tag }}"
 clickhouse_container_image_tag: "{{ clickhouse_version }}-alpine"
@@ -40,12 +40,12 @@ clickhouse_container_image_force_pull: "{{ clickhouse_container_image.endswith('
 # Controls whether the ClickHouse container exposes its HTTP port (tcp/8123 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8123"), or empty string to not expose.
-clickhouse_container_http_host_bind_port: ''
+clickhouse_container_http_host_bind_port: ""
 
 # Controls whether the ClickHouse container exposes its ClickHouse protocol port (tcp/9000 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:9000"), or empty string to not expose.
-clickhouse_container_clickhouse_host_bind_port: ''
+clickhouse_container_clickhouse_host_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 clickhouse_container_network: "{{ clickhouse_identifier }}"
@@ -86,7 +86,7 @@ clickhouse_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_c
 
 clickhouse_db_name: default
 clickhouse_root_username: default
-clickhouse_root_password: ''
+clickhouse_root_password: ""
 
 # A list of databases (and their credentials) that this role will create and manage on the server.
 #
@@ -109,7 +109,7 @@ clickhouse_managed_databases_auto: []
 #   - name: some_database
 #     username: some_username
 #     password: some_password
-#     additional_sql: ''
+#     additional_sql: ""
 #   - name: another_database
 #     username: another_username
 #     password: another_password
@@ -151,10 +151,10 @@ clickhouse_config_trace_log_enabled: "{{ clickhouse_config_verbose_logging_enabl
 clickhouse_config_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 clickhouse_config_asynchronous_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 
-clickhouse_config_additional_configurations: ''
+clickhouse_config_additional_configurations: ""
 
 # Specify the timezone
 clickhouse_environment_variables_tz: UTC
 
 # Additional environment variables.
-clickhouse_environment_variables_additional_variables: ''
+clickhouse_environment_variables_additional_variables: ""
