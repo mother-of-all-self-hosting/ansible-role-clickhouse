@@ -44,6 +44,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --mount type=bind,src={{ clickhouse_config_path }}/config.yaml,dst=/etc/clickhouse-server/config.d/config.yaml,ro \
       --mount type=bind,src={{ clickhouse_backups_path }},dst=/backups \
       --tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+      {% for arg in clickhouse_container_extra_arguments %}
+      {{ arg }}
+      {% endfor %}
       {{ clickhouse_container_image }}
 
 {% for network in clickhouse_container_additional_networks %}

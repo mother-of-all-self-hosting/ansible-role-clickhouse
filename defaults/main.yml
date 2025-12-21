@@ -62,6 +62,11 @@ clickhouse_container_additional_networks: "{{ clickhouse_container_additional_ne
 clickhouse_container_additional_networks_auto: []
 clickhouse_container_additional_networks_custom: []
 
+# A list of extra arguments to pass to the container (`docker create` command)
+clickhouse_container_extra_arguments: "{{ clickhouse_container_extra_arguments_auto + clickhouse_container_extra_arguments_custom }}"
+clickhouse_container_extra_arguments_auto: []
+clickhouse_container_extra_arguments_custom: []
+
 # List of systemd services that the ClickHouse systemd service depends on
 clickhouse_systemd_required_services_list: "{{ clickhouse_systemd_required_services_list_default + clickhouse_systemd_required_services_list_auto + clickhouse_systemd_required_services_list_custom }}"
 clickhouse_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
