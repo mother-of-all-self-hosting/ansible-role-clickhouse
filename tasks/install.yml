@@ -22,9 +22,9 @@
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dst }}"
+    mode: "0640"
     owner: "{{ clickhouse_uid }}"
     group: "{{ clickhouse_gid }}"
-    mode: "0640"
   with_items:
     - src: "{{ role_path }}/templates/env.j2"
       dst: "{{ clickhouse_base_path }}/env"
