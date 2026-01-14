@@ -39,12 +39,12 @@ clickhouse_container_image_force_pull: "{{ clickhouse_container_image.endswith('
 
 # Controls whether the ClickHouse container exposes its HTTP port (tcp/8123 in the container).
 #
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8123"), or empty string to not expose.
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 clickhouse_container_http_host_bind_port: ""
 
 # Controls whether the ClickHouse container exposes its ClickHouse protocol port (tcp/9000 in the container).
 #
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:9000"), or empty string to not expose.
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 clickhouse_container_clickhouse_host_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
