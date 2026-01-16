@@ -62,6 +62,9 @@ clickhouse_container_additional_networks: "{{ clickhouse_container_additional_ne
 clickhouse_container_additional_networks_auto: []
 clickhouse_container_additional_networks_custom: []
 
+# Specify the size of the container's tmpfs volume
+clickhouse_container_tmpfs_tmp_size: 512m
+
 # A list of extra arguments to pass to the container (`docker create` command)
 clickhouse_container_extra_arguments: "{{ clickhouse_container_extra_arguments_auto + clickhouse_container_extra_arguments_custom }}"
 clickhouse_container_extra_arguments_auto: []
