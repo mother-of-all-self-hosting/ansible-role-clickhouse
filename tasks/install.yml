@@ -27,6 +27,7 @@
     group: "{{ clickhouse_gid }}"
   with_items:
     - env
+  register: clickhouse_support_files_result
 
 - name: Ensure ClickHouse configuration file installed
   ansible.builtin.copy:
@@ -35,6 +36,7 @@
     mode: "0640"
     owner: "{{ clickhouse_uid }}"
     group: "{{ clickhouse_gid }}"
+  register: clickhouse_config_file_result
 
 - name: Ensure ClickHouse scripts created
   ansible.builtin.template:
@@ -43,6 +45,7 @@
     mode: "0750"
   with_items:
     - cli
+  register: clickhouse_script_files_result
 
 - name: Ensure ClickHouse container image is pulled via community.docker.docker_image
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -51,20 +54,20 @@
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
     force_source: "{{ clickhouse_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
     force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else clickhouse_container_image_force_pull }}"
-  register: result
+  register: clickhouse_container_image_pull_result
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
-  until: result is not failed
+  until: clickhouse_container_image_pull_result is not failed
 
 - name: Ensure ClickHouse container image is pulled via ansible.builtin.command
   when: devture_systemd_docker_base_container_image_pull_method == 'command'
   ansible.builtin.command:
     cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ clickhouse_container_image }}"
-  register: result
+  register: clickhouse_container_image_pull_result
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
-  until: result is not failed
-  changed_when: "'Downloaded newer image' in result.stdout"
+  until: clickhouse_container_image_pull_result is not failed
+  changed_when: "'Downloaded newer image' in clickhouse_container_image_pull_result.stdout"
 
 - name: Ensure ClickHouse container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
@@ -92,6 +95,7 @@
     src: "{{ role_path }}/templates/systemd/clickhouse.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ clickhouse_identifier }}.service"
     mode: "0644"
+  register: clickhouse_systemd_service_result
 
 - name: Ensure managed ClickHouse databases prepared
   ansible.builtin.include_tasks:
@@ -100,3 +104,16 @@
       tags:
         - always
   when: "clickhouse_managed_databases | length > 0"
+  register: clickhouse_databases_preparation_result
+
+- name: Determine whether ClickHouse needs a restart
+  ansible.builtin.set_fact:
+    clickhouse_restart_necessary: >-
+      {{
+        clickhouse_support_files_result.changed | default(false)
+        or clickhouse_config_file_result.changed | default(false)
+        or clickhouse_script_files_result.changed | default(false)
+        or clickhouse_systemd_service_result.changed | default(false)
+        or clickhouse_container_image_pull_result.changed | default(false)
+        or clickhouse_databases_preparation_result.changed | default(false)
+      }}
