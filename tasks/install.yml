@@ -20,16 +20,21 @@
 
 - name: Ensure ClickHouse support files installed
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dst }}"
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ clickhouse_base_path }}/{{ item }}"
     mode: "0640"
     owner: "{{ clickhouse_uid }}"
     group: "{{ clickhouse_gid }}"
   with_items:
-    - src: "{{ role_path }}/templates/env.j2"
-      dst: "{{ clickhouse_base_path }}/env"
-    - src: "{{ role_path }}/templates/config.yaml.j2"
-      dst: "{{ clickhouse_config_path }}/config.yaml"
+    - env
+
+- name: Ensure ClickHouse configuration file installed
+  ansible.builtin.copy:
+    content: "{{ clickhouse_config | to_nice_yaml(indent=2, width=999999) }}"
+    dest: "{{ clickhouse_config_path }}/config.yaml"
+    mode: "0640"
+    owner: "{{ clickhouse_uid }}"
+    group: "{{ clickhouse_gid }}"
 
 - name: Ensure ClickHouse scripts created
   ansible.builtin.template:

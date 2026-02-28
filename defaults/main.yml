@@ -157,7 +157,27 @@ clickhouse_config_trace_log_enabled: "{{ clickhouse_config_verbose_logging_enabl
 clickhouse_config_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 clickhouse_config_asynchronous_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 
-clickhouse_config_additional_configurations: ""
+# Default ClickHouse configuration template which covers the generic use case.
+# You can customize it by controlling the various variables inside it.
+#
+# For a more advanced customization, you can extend the default (see `clickhouse_config_extension_yaml`)
+# or completely replace this variable with your own template.
+clickhouse_config_yaml: "{{ lookup('template', 'templates/config.yaml.j2') }}"
+
+clickhouse_config_extension_yaml: |
+  # Your custom YAML configuration for ClickHouse goes here.
+  # This configuration extends the default starting configuration (`clickhouse_config_yaml`).
+  #
+  # You can override individual variables from the default configuration, or introduce new ones.
+  #
+  # If you need something more special, you can take full control by
+  # completely redefining `clickhouse_config_yaml`.
+
+clickhouse_config_extension: "{{ clickhouse_config_extension_yaml | from_yaml if clickhouse_config_extension_yaml | from_yaml is mapping else {} }}"
+
+# Holds the final ClickHouse configuration (a combination of the default and its extension).
+# You most likely don't need to touch this variable. Instead, see `clickhouse_config_yaml`.
+clickhouse_config: "{{ clickhouse_config_yaml | from_yaml | combine(clickhouse_config_extension, recursive=True) }}"
 
 # Specify the timezone
 clickhouse_environment_variables_tz: UTC
