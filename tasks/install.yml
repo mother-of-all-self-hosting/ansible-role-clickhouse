@@ -45,7 +45,7 @@
     mode: "0750"
   with_items:
     - cli
-  register: clickhouse_script_files_result
+  register: clickhouse_scripts_result
 
 - name: Ensure ClickHouse container image is pulled via community.docker.docker_image
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -112,7 +112,7 @@
       {{
         clickhouse_support_files_result.changed | default(false)
         or clickhouse_config_file_result.changed | default(false)
-        or clickhouse_script_files_result.changed | default(false)
+        or clickhouse_scripts_result.changed | default(false)
         or clickhouse_systemd_service_result.changed | default(false)
         or clickhouse_container_image_pull_result.changed | default(false)
         or clickhouse_databases_preparation_result.changed | default(false)
