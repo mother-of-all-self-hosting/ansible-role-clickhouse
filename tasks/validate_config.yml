@@ -12,6 +12,7 @@
   with_items:
     - { "old": "clickhouse_root_passsword", "new": "clickhouse_root_password" }
     - { "old": "clickhouse_config_additional_configurations", "new": "clickhouse_config_extension_yaml" }
+    - { "old": "clickhouse_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required ClickHouse settings not defined
   ansible.builtin.fail:

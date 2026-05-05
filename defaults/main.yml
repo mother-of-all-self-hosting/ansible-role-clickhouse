@@ -35,7 +35,6 @@ clickhouse_container_image_tag: "{{ clickhouse_version }}-alpine"
 clickhouse_container_image_registry_prefix: "{{ clickhouse_container_image_registry_prefix_upstream }}"
 clickhouse_container_image_registry_prefix_upstream: "{{ clickhouse_container_image_registry_prefix_upstream_default }}"
 clickhouse_container_image_registry_prefix_upstream_default: docker.io/
-clickhouse_container_image_force_pull: "{{ clickhouse_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 clickhouse_container_network: "{{ clickhouse_identifier }}"
