@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify ClickHouse systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for ClickHouse service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: clickhouse.service
+      register: clickhouse_service
+      until: clickhouse_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert ClickHouse service is active
+      ansible.builtin.assert:
+        that: clickhouse_service.status.ActiveState == 'active'
+        fail_msg: "clickhouse.service not active ({{ clickhouse_service.status.ActiveState }})"
+        success_msg: "clickhouse.service is active"
+
+    - name: Retrieve ClickHouse service log for debugging
+      when: clickhouse_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu clickhouse.service
+      changed_when: false
+
+    - name: Show ClickHouse systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "ClickHouse systemd: {{ clickhouse_service.status.ActiveState }}"
