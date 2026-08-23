@@ -146,7 +146,7 @@
       ansible.builtin.debug:
         msg:
           - "ClickHouse systemd: {{ clickhouse_service.status.ActiveState }}"
-          - "HTTP /ping: {{ clickhouse_ping.content | trim }}"
-          - "SELECT 1: {{ clickhouse_select_one.content | trim }}"
-          - "Disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
-          - "Version: {{ clickhouse_version_query.content | trim }}"
+          - "ClickHouse HTTP /ping: {{ clickhouse_ping.content | trim }}"
+          - "ClickHouse SELECT 1: {{ clickhouse_select_one.content | trim }}"
+          - "ClickHouse Disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
+          - "ClickHouse Version: {{ clickhouse_version_query.content | trim }}"
