@@ -1,14 +1,30 @@
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify ClickHouse systemd service
+- name: Verify ClickHouse
   hosts: all
   become: true
   gather_facts: false
   tasks:
+    # The role is not included in this playbook, so its defaults are not in
+    # scope. Reading defaults/main.yml directly keeps the version assertion
+    # below tied to the value that Renovate bumps, with nothing to keep in
+    # sync in this scenario. include_vars reads from the controller.
+    #
+    # Only values describing the role itself may be read from this namespace,
+    # and only literal ones - the file is parsed as plain YAML, so anything
+    # Jinja-derived (clickhouse_container_image, for example) arrives here as
+    # an unrendered template string. Anything this scenario tunes (the port
+    # binding and the password) comes from the scenario's group_vars instead.
+    - name: Load the ClickHouse role defaults
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: clickhouse_defaults
+
     - name: Wait for ClickHouse service to become active (up to 180s)
       ansible.builtin.systemd:
         name: clickhouse.service
@@ -29,7 +45,108 @@
         cmd: journalctl -xeu clickhouse.service
       changed_when: false
 
-    - name: Show ClickHouse systemd service status summary
+    # A systemd unit reaching "active" only means that `docker start` has not
+    # exited yet. ClickHouse still has to initialize a fresh data directory and
+    # load the templated config before it listens, and a config it refuses to
+    # parse leaves the unit restarting rather than failing outright. /ping is
+    # the cheapest answer the server itself can give and needs no credentials,
+    # so it is the first thing here that proves a usable server rather than
+    # merely a running process.
+    - name: Wait for the ClickHouse HTTP interface to answer /ping (up to 180s)
+      ansible.builtin.uri:
+        url: "http://{{ clickhouse_container_http_host_bind_port }}/ping"
+        method: GET
+        return_content: true
+      register: clickhouse_ping
+      until: clickhouse_ping.status == 200 and (clickhouse_ping.content | trim) == 'Ok.'
+      retries: 36
+      delay: 5
+
+    - name: Assert the ClickHouse HTTP interface answers /ping
+      ansible.builtin.assert:
+        that: (clickhouse_ping.content | trim) == 'Ok.'
+        fail_msg: "The ClickHouse HTTP interface did not answer /ping: {{ clickhouse_ping.content | default('no output') }}"
+        success_msg: "The ClickHouse HTTP interface answers /ping"
+
+    # /ping is served before the query pipeline is usable, and it is
+    # unauthenticated. Running an actual query proves that the credentials the
+    # role puts in the env file are the ones the server was initialized with,
+    # and that the query pipeline works on this fresh data directory.
+    - name: Run "SELECT 1" over the ClickHouse HTTP interface
+      ansible.builtin.uri:
+        url: "http://{{ clickhouse_container_http_host_bind_port }}/"
+        method: POST
+        body: "SELECT 1"
+        body_format: raw
+        return_content: true
+        url_username: "{{ clickhouse_defaults.clickhouse_root_username }}"
+        url_password: "{{ clickhouse_root_password }}"
+        force_basic_auth: true
+      register: clickhouse_select_one
+      changed_when: false
+
+    - name: Assert "SELECT 1" returns 1
+      ansible.builtin.assert:
+        that: (clickhouse_select_one.content | trim) == '1'
+        fail_msg: "SELECT 1 returned {{ clickhouse_select_one.content | default('no output') }}"
+        success_msg: "SELECT 1 returns 1"
+
+    # The `backups` disk exists only because the role templated config.yaml and
+    # ClickHouse loaded it. Without this probe, config.yaml could stop being
+    # mounted (or stop being read) and everything else here would still pass,
+    # because the image's own defaults are enough to answer the queries above.
+    - name: Query the disks ClickHouse knows about
+      ansible.builtin.uri:
+        url: "http://{{ clickhouse_container_http_host_bind_port }}/"
+        method: POST
+        body: "SELECT name FROM system.disks ORDER BY name"
+        body_format: raw
+        return_content: true
+        url_username: "{{ clickhouse_defaults.clickhouse_root_username }}"
+        url_password: "{{ clickhouse_root_password }}"
+        force_basic_auth: true
+      register: clickhouse_disks
+      changed_when: false
+
+    - name: Assert the disk declared by the templated config is in effect
+      ansible.builtin.assert:
+        that: "'backups' in clickhouse_disks.content.splitlines()"
+        fail_msg: >-
+          ClickHouse does not know about the `backups` disk that config.yaml declares,
+          so the templated configuration was not loaded: {{ clickhouse_disks.content | default('no output') }}
+        success_msg: "The `backups` disk declared by the templated configuration is in effect"
+
+    # Tying the running version to `clickhouse_version` is what makes this
+    # scenario a real test of the version that Renovate bumps: a bump that
+    # produces an unusable image cannot pass here.
+    - name: Query the version reported by the running ClickHouse
+      ansible.builtin.uri:
+        url: "http://{{ clickhouse_container_http_host_bind_port }}/"
+        method: POST
+        body: "SELECT version()"
+        body_format: raw
+        return_content: true
+        url_username: "{{ clickhouse_defaults.clickhouse_root_username }}"
+        url_password: "{{ clickhouse_root_password }}"
+        force_basic_auth: true
+      register: clickhouse_version_query
+      changed_when: false
+
+    # Prefix-matched, because ClickHouse may append a build suffix to the
+    # four-part version that the image is tagged with.
+    - name: Assert the running ClickHouse is the version the role asks for
+      ansible.builtin.assert:
+        that: (clickhouse_version_query.content | trim).startswith(clickhouse_defaults.clickhouse_version | string)
+        fail_msg: >-
+          ClickHouse reports version {{ clickhouse_version_query.content | trim | default('none') }},
+          but the role asks for {{ clickhouse_defaults.clickhouse_version }}
+        success_msg: "ClickHouse reports version {{ clickhouse_version_query.content | trim }}"
+
+    - name: Show ClickHouse verification summary
       ansible.builtin.debug:
         msg:
           - "ClickHouse systemd: {{ clickhouse_service.status.ActiveState }}"
+          - "HTTP /ping: {{ clickhouse_ping.content | trim }}"
+          - "SELECT 1: {{ clickhouse_select_one.content | trim }}"
+          - "Disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
+          - "Version: {{ clickhouse_version_query.content | trim }}"

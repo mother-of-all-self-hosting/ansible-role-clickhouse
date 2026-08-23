@@ -35,6 +35,12 @@ provisioner:
         clickhouse_uid: 1000
         clickhouse_gid: 1000
         clickhouse_root_password: password
+
+        # The role publishes no ports by default. Binding the HTTP interface to
+        # the loopback address of the test container lets the verifier query
+        # ClickHouse over HTTP, and exercises the port-publishing branch of the
+        # systemd unit template on the way.
+        clickhouse_container_http_host_bind_port: "127.0.0.1:8123"
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
