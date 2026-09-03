@@ -134,7 +134,7 @@
 
     # Prefix-matched, because ClickHouse may append a build suffix to the
     # four-part version that the image is tagged with.
-    - name: Assert the running ClickHouse is the version the role asks for
+    - name: Assert the running ClickHouse is the version this role installs
       ansible.builtin.assert:
         that: (clickhouse_version_query.content | trim).startswith(clickhouse_defaults.clickhouse_version | string)
         fail_msg: >-
