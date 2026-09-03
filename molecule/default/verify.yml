@@ -140,11 +140,11 @@
         fail_msg: "ClickHouse reports {{ clickhouse_version_query.content | trim | default('none') }}, expected {{ clickhouse_defaults.clickhouse_version }}"
         success_msg: "ClickHouse reports {{ clickhouse_version_query.content | trim }}"
 
-    - name: Show ClickHouse verification summary
+    - name: Show the ClickHouse verification summary
       ansible.builtin.debug:
         msg:
           - "ClickHouse systemd: {{ clickhouse_service.status.ActiveState }}"
+          - "ClickHouse version: {{ clickhouse_version_query.content | trim }}"
           - "ClickHouse HTTP /ping: {{ clickhouse_ping.content | trim }}"
           - "ClickHouse SELECT 1: {{ clickhouse_select_one.content | trim }}"
-          - "ClickHouse Disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
-          - "ClickHouse Version: {{ clickhouse_version_query.content | trim }}"
+          - "ClickHouse disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
