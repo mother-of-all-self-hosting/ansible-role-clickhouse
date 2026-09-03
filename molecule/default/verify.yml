@@ -137,10 +137,8 @@
     - name: Assert the running ClickHouse is the version this role installs
       ansible.builtin.assert:
         that: (clickhouse_version_query.content | trim).startswith(clickhouse_defaults.clickhouse_version | string)
-        fail_msg: >-
-          ClickHouse reports version {{ clickhouse_version_query.content | trim | default('none') }},
-          but the role asks for {{ clickhouse_defaults.clickhouse_version }}
-        success_msg: "ClickHouse reports version {{ clickhouse_version_query.content | trim }}"
+        fail_msg: "ClickHouse reports {{ clickhouse_version_query.content | trim | default('none') }}, expected {{ clickhouse_defaults.clickhouse_version }}"
+        success_msg: "ClickHouse reports {{ clickhouse_version_query.content | trim }}"
 
     - name: Show ClickHouse verification summary
       ansible.builtin.debug:
