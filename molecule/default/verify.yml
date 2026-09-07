@@ -112,7 +112,7 @@
     # Tying the running version to `clickhouse_version` is what makes this
     # scenario a real test of the version that Renovate bumps: a bump that
     # produces an unusable image cannot pass here.
-    - name: Query the version reported by the running ClickHouse
+    - name: Query the version of the running ClickHouse
       ansible.builtin.uri:
         url: "http://{{ clickhouse_container_http_host_bind_port }}/"
         method: POST
