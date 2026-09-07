@@ -18,21 +18,27 @@
         file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
         name: clickhouse_defaults
 
-    - name: Wait for ClickHouse service to become active (up to 180s)
-      ansible.builtin.systemd:
+    - name: Wait for the ClickHouse systemd service to become active (up to 180s)
+      ansible.builtin.systemd_service:
         name: clickhouse.service
       register: clickhouse_service
       until: clickhouse_service.status.ActiveState == 'active'
       retries: 36
       delay: 5
+      # So that giving up is reported by the assertion below rather than as a
+      # wall of systemd unit properties.
+      failed_when: false
 
-    - name: Assert ClickHouse service is active
+    # `Restart=always` in the systemd unit means that even a container which crashes
+    # and gets restarted reads as active here, so this is a precondition rather than
+    # a result.
+    - name: Assert the ClickHouse systemd service is active
       ansible.builtin.assert:
         that: clickhouse_service.status.ActiveState == 'active'
-        fail_msg: "clickhouse.service not active ({{ clickhouse_service.status.ActiveState }})"
+        fail_msg: "clickhouse.service is not active ({{ clickhouse_service.status.ActiveState }})"
         success_msg: "clickhouse.service is active"
 
-    - name: Retrieve ClickHouse service log for debugging
+    - name: Retrieve the ClickHouse systemd service log for debugging
       when: clickhouse_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: journalctl -xeu clickhouse.service
