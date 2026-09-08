@@ -128,22 +128,22 @@
         url_username: "{{ clickhouse_defaults.clickhouse_root_username }}"
         url_password: "{{ clickhouse_root_password }}"
         force_basic_auth: true
-      register: clickhouse_version_query
+      register: clickhouse_version_reported
       changed_when: false
 
     # Prefix-matched, because ClickHouse may append a build suffix to the
     # four-part version that the image is tagged with.
     - name: Assert the running ClickHouse is the version this role installs
       ansible.builtin.assert:
-        that: (clickhouse_version_query.content | trim).startswith(clickhouse_defaults.clickhouse_version | string)
-        fail_msg: "ClickHouse reports {{ clickhouse_version_query.content | trim | default('none') }}, expected {{ clickhouse_defaults.clickhouse_version }}"
-        success_msg: "ClickHouse reports {{ clickhouse_version_query.content | trim }}"
+        that: (clickhouse_version_reported.content | trim).startswith(clickhouse_defaults.clickhouse_version | string)
+        fail_msg: "ClickHouse reports {{ clickhouse_version_reported.content | trim | default('none') }}, expected {{ clickhouse_defaults.clickhouse_version }}"
+        success_msg: "ClickHouse reports {{ clickhouse_version_reported.content | trim }}"
 
     - name: Show the ClickHouse verification summary
       ansible.builtin.debug:
         msg:
           - "ClickHouse systemd: {{ clickhouse_service.status.ActiveState }}"
-          - "ClickHouse version: {{ clickhouse_version_query.content | trim }}"
+          - "ClickHouse version: {{ clickhouse_version_reported.content | trim }}"
           - "ClickHouse HTTP /ping: {{ clickhouse_ping.content | trim }}"
           - "ClickHouse SELECT 1: {{ clickhouse_select_one.content | trim }}"
           - "ClickHouse disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
