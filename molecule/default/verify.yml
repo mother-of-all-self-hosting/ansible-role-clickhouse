@@ -9,6 +9,11 @@
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    clickhouse_verify_units:
+      - clickhouse.service
+
   tasks:
     - name: Verify that ClickHouse works
       block:
@@ -20,13 +25,14 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: clickhouse_defaults
 
-        - name: Wait for the ClickHouse systemd service to become active (up to 180s)
+        - name: Wait for the ClickHouse systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: clickhouse.service
-          register: clickhouse_service
-          until: clickhouse_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: clickhouse_services
+          until: clickhouse_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ clickhouse_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -34,17 +40,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the ClickHouse systemd service is active
+        - name: Assert the ClickHouse systemd services are active
           ansible.builtin.assert:
-            that: clickhouse_service.status.ActiveState == 'active'
-            fail_msg: "clickhouse.service is not active ({{ clickhouse_service.status.ActiveState }})"
-            success_msg: "clickhouse.service is active"
+            that: clickhouse_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(clickhouse_verify_units | zip(clickhouse_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the ClickHouse systemd service log for debugging
+        - name: Retrieve the ClickHouse systemd services log for debugging
           when: clickhouse_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=clickhouse.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ clickhouse_verify_units }}"
 
         # A systemd unit reaching "active" only means that `docker start` has not
         # exited yet. ClickHouse still has to initialize a fresh data directory and
@@ -144,7 +153,7 @@
         - name: Show the ClickHouse verification summary
           ansible.builtin.debug:
             msg:
-              - "ClickHouse systemd: {{ clickhouse_service.status.ActiveState }}"
+              - "ClickHouse systemd: {% for unit, state in clickhouse_verify_units | zip(clickhouse_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "ClickHouse version: {{ clickhouse_version_reported.content | trim }}"
               - "ClickHouse HTTP /ping: {{ clickhouse_ping.content | trim }}"
               - "ClickHouse SELECT 1: {{ clickhouse_select_one.content | trim }}"
