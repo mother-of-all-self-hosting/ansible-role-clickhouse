@@ -31,6 +31,7 @@ provisioner:
       all:
         # Helper variables
         clickhouse_debug_service_enabled: false
+        clickhouse_restarts_check_enabled: true
 
         # Variables for ClickHouse
         clickhouse_uid: 1000
