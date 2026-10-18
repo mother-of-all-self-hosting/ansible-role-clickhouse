@@ -3,5 +3,8 @@
   "extends": [
     "github>mother-of-all-self-hosting/renovate-config#v1.1.0",
     "github>mother-of-all-self-hosting/renovate-config//patch-automerge#v1.1.0"
-  ]
+  ],
+  "regex": {
+    "schedule": ["* * * * 1"]
+  }
 }
