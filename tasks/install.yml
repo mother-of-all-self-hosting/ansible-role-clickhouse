@@ -45,7 +45,6 @@
     mode: "0750"
   with_items:
     - cli
-  register: clickhouse_scripts_result
 
 - name: Ensure ClickHouse container image is pulled via community.docker.docker_image_pull
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -102,7 +101,6 @@
       tags:
         - always
   when: "clickhouse_managed_databases | length > 0"
-  register: clickhouse_databases_preparation_result
 
 - name: Determine whether ClickHouse needs a restart
   ansible.builtin.set_fact:
@@ -110,9 +108,7 @@
       {{
         clickhouse_support_files_result.changed | default(false)
         or clickhouse_config_file_result.changed | default(false)
-        or clickhouse_scripts_result.changed | default(false)
         or clickhouse_systemd_service_result.changed | default(false)
         or clickhouse_container_image_pull_result_ansible_module.changed | default(false)
         or clickhouse_container_image_pull_result_command.changed | default(false)
-        or clickhouse_databases_preparation_result.changed | default(false)
       }}
