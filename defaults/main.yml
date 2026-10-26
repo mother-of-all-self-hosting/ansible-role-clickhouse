@@ -140,10 +140,6 @@ clickhouse_managed_databases_auto: []
 
 # Your own additional/managed database definitions.
 #
-# Also see:
-# - clickhouse_managed_databases_default_charset
-# - clickhouse_managed_databases_default_collation
-#
 # clickhouse_managed_databases_custom:
 #   - name: some_database
 #     username: some_username
@@ -154,9 +150,6 @@ clickhouse_managed_databases_auto: []
 #     password: another_password
 #     additional_sql: 'GRANT SELECT ON system.replicas TO another_username; GRANT SELECT ON system.parts TO another_username;'
 clickhouse_managed_databases_custom: []
-
-clickhouse_managed_databases_default_charset: utf8mb4
-clickhouse_managed_databases_default_collation: utf8mb4_unicode_ci
 
 # The number of seconds to wait after starting the ClickHouse systemd service
 # and before trying to run queries for initializing managed databases/users against it.
