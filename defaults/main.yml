@@ -55,8 +55,8 @@ clickhouse_container_clickhouse_host_bind_port: ""
 # The HTTP port number in the container
 clickhouse_container_http_port: 8123
 
-# The ClickHouse protocol number in the container
-clickhouse_container_clickhouse_port: 8123
+# The ClickHouse (native) protocol port number in the container
+clickhouse_container_clickhouse_port: 9000
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
