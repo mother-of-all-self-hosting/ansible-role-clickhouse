@@ -43,7 +43,24 @@ provisioner:
         # Variables for ClickHouse
         clickhouse_uid: 1000
         clickhouse_gid: 1000
-        clickhouse_root_password: password
+        # Not a common word: it is masked (as a `no_log` value) wherever it shows
+        # up in task results, including inside the module's descriptions of its changes.
+        clickhouse_root_password: molecule-root-password
+
+        # Creating a database and a user for it is what playbooks actually ask
+        # this role to do, so the scenario asks for one too. It exercises
+        # tasks/util/prepare_managed_databases.yml and the module it runs, and
+        # gives the verifier an unprivileged account to log in with. The
+        # additional SQL is what the Plausible integration in mash-playbook
+        # passes. Molecule interpolates this file - comments included - so a
+        # literal `$$` has to be written doubled, and these values avoid it.
+        clickhouse_managed_databases_custom:
+          - name: molecule_db
+            username: molecule_user
+            password: molecule-password
+            additional_sql: >-
+              GRANT SELECT ON system.replicas TO molecule_user;
+              GRANT SELECT ON system.parts TO molecule_user;
 
         # The role publishes no ports by default. Binding the HTTP interface to
         # the loopback address of the test container lets the verifier query
@@ -53,5 +70,20 @@ provisioner:
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
+scenario:
+  # See: https://docs.ansible.com/projects/molecule/configuration/#scenario
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
 verifier:
   name: ansible

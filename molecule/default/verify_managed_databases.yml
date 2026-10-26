@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify ClickHouse managed databases
+  hosts: all
+  become: true
+  gather_facts: false
+
+  vars:
+    clickhouse_verify_changed_password: molecule-changed-password
+
+  tasks:
+    # A fact rather than a play variable, because the checks below override
+    # `clickhouse_managed_databases_custom` based on it.
+    - name: Determine the managed database to verify
+      ansible.builtin.set_fact:
+        clickhouse_verify_managed_db: "{{ clickhouse_managed_databases_custom | first }}"
+
+    - name: Include the variables the ClickHouse role relies on
+      ansible.builtin.include_role:
+        name: com.devture.ansible.role.systemd_docker_base
+        public: true
+
+    # Preparation runs on every installation, against databases which already exist,
+    # so it has to succeed on an already-prepared server, leave it prepared and report no change.
+    - name: Prepare the managed databases again
+      ansible.builtin.include_role:
+        name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+        tasks_from: util/prepare_managed_databases
+
+    - name: Verify the managed database after preparing it again
+      ansible.builtin.include_tasks: tasks/verify_managed_database.yml
+      vars:
+        clickhouse_verify_case: preparing it again
+        clickhouse_verify_expected_changes: []
+        clickhouse_verify_password: "{{ clickhouse_verify_managed_db.password }}"
+        clickhouse_verify_wrong_password: "{{ clickhouse_verify_changed_password }}"
+
+    # Passwords are only set when they differ from the current ones, so changing one has to be noticed.
+    - name: Prepare the managed databases with a changed password
+      ansible.builtin.include_role:
+        name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+        tasks_from: util/prepare_managed_databases
+      vars:
+        clickhouse_managed_databases_custom:
+          - "{{ clickhouse_verify_managed_db | combine({'password': clickhouse_verify_changed_password}) }}"
+
+    - name: Verify the managed database after preparing it with a changed password
+      ansible.builtin.include_tasks: tasks/verify_managed_database.yml
+      vars:
+        clickhouse_verify_case: preparing it with a changed password
+        clickhouse_verify_expected_changes:
+          - "set the password of user `{{ clickhouse_verify_managed_db.username }}`"
+        clickhouse_verify_password: "{{ clickhouse_verify_changed_password }}"
+        clickhouse_verify_wrong_password: "{{ clickhouse_verify_managed_db.password }}"
+
+    - name: Prepare the managed databases with the original password
+      ansible.builtin.include_role:
+        name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+        tasks_from: util/prepare_managed_databases
+
+    - name: Verify the managed database after preparing it with the original password
+      ansible.builtin.include_tasks: tasks/verify_managed_database.yml
+      vars:
+        clickhouse_verify_case: preparing it with the original password
+        clickhouse_verify_expected_changes:
+          - "set the password of user `{{ clickhouse_verify_managed_db.username }}`"
+        clickhouse_verify_password: "{{ clickhouse_verify_managed_db.password }}"
+        clickhouse_verify_wrong_password: "{{ clickhouse_verify_changed_password }}"

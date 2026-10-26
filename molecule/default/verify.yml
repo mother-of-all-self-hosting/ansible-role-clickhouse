@@ -11,6 +11,8 @@
   gather_facts: false
 
   vars:
+    clickhouse_managed_database: "{{ clickhouse_managed_databases_custom | first }}"
+
     clickhouse_verify_units:
       - clickhouse.service
 
@@ -150,6 +152,40 @@
             fail_msg: "ClickHouse reports {{ clickhouse_version_reported.content | trim | default('none') }}, expected {{ clickhouse_defaults.clickhouse_version }}"
             success_msg: "ClickHouse reports {{ clickhouse_version_reported.content | trim }}"
 
+        # What playbooks ask this role for is a database and an account that can
+        # use it. Logging in as that account (over HTTP, like Plausible does) and
+        # writing to that database covers the managed-database tasks, including
+        # the grant. Reading `system.parts` covers the additional SQL.
+        - name: Use the managed database as the managed user
+          ansible.builtin.uri:
+            url: "http://{{ clickhouse_container_http_host_bind_port }}/?database={{ clickhouse_managed_database.name }}"
+            method: POST
+            body: >-
+              {{ item }}
+            body_format: raw
+            return_content: true
+            url_username: "{{ clickhouse_managed_database.username }}"
+            url_password: "{{ clickhouse_managed_database.password }}"
+            force_basic_auth: true
+          register: clickhouse_managed_roundtrip
+          changed_when: true
+          loop:
+            - CREATE TABLE IF NOT EXISTS managed (v String) ENGINE = MergeTree ORDER BY v
+            - TRUNCATE TABLE managed
+            - INSERT INTO managed (v) VALUES ('managed-value')
+            - SELECT v FROM managed
+            - SELECT count() > 0 FROM system.parts WHERE database = currentDatabase() AND table = 'managed'
+
+        - name: Assert the managed user can use the managed database
+          ansible.builtin.assert:
+            that:
+              - clickhouse_managed_roundtrip.results[3].content | trim == 'managed-value'
+              - clickhouse_managed_roundtrip.results[4].content | trim == '1'
+            fail_msg: >-
+              The managed user could not use the managed database:
+              {{ clickhouse_managed_roundtrip.results | map(attribute='content') | map('trim') | list }}
+            success_msg: "The managed user can use the managed database"
+
         - name: Verify nothing was quietly restarting while all of that was being checked
           when: "clickhouse_restarts_check_enabled | bool"
           block:
@@ -198,6 +234,7 @@
               - "ClickHouse HTTP /ping: {{ clickhouse_ping.content | trim }}"
               - "ClickHouse SELECT 1: {{ clickhouse_select_one.content | trim }}"
               - "ClickHouse disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
+              - "ClickHouse managed database round-trip: {{ clickhouse_managed_roundtrip.results[3].content | trim }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
@@ -214,3 +251,6 @@
         - name: Fail because verification did not pass
           ansible.builtin.fail:
             msg: "ClickHouse verification failed. The systemd service log is printed above."
+
+- name: Verify ClickHouse managed databases
+  ansible.builtin.import_playbook: verify_managed_databases.yml

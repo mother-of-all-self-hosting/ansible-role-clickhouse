@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+# Over HTTP, like a service (e.g. Plausible) would.
+- name: Log in to the managed database as its user ({{ clickhouse_verify_case }})
+  ansible.builtin.uri:
+    url: "http://{{ clickhouse_container_http_host_bind_port }}/?database={{ clickhouse_verify_managed_db.name }}"
+    method: POST
+    body: SELECT currentUser()
+    body_format: raw
+    return_content: true
+    url_username: "{{ clickhouse_verify_managed_db.username }}"
+    url_password: "{{ item }}"
+    force_basic_auth: true
+  register: clickhouse_verify_logins
+  failed_when: false
+  loop:
+    - "{{ clickhouse_verify_password }}"
+    - "{{ clickhouse_verify_wrong_password }}"
+
+- name: Assert the managed database is prepared ({{ clickhouse_verify_case }})
+  ansible.builtin.assert:
+    that:
+      - clickhouse_managed_databases_preparation_result.changes == clickhouse_verify_expected_changes
+      - clickhouse_managed_databases_preparation_result.changed == (clickhouse_verify_expected_changes | length > 0)
+      - clickhouse_verify_logins.results[0].status == 200
+      - clickhouse_verify_logins.results[0].content | trim == clickhouse_verify_managed_db.username
+      - clickhouse_verify_logins.results[1].status != 200
+    fail_msg: >-
+      After {{ clickhouse_verify_case }}:
+      changes {{ clickhouse_managed_databases_preparation_result.changes }} (expected {{ clickhouse_verify_expected_changes }}),
+      login with the expected password (status {{ clickhouse_verify_logins.results[0].status }}):
+      `{{ clickhouse_verify_logins.results[0].content | default('') | trim }}`,
+      login with the other password (status {{ clickhouse_verify_logins.results[1].status }})
+    success_msg: >-
+      After {{ clickhouse_verify_case }}: changes {{ clickhouse_managed_databases_preparation_result.changes }},
+      and `{{ clickhouse_verify_managed_db.username }}` can log in with the expected password only

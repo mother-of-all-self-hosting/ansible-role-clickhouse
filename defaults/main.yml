@@ -164,6 +164,10 @@ clickhouse_managed_databases_default_collation: utf8mb4_unicode_ci
 # For most (subsequent) runs, ClickHouse would already be running, so no waiting will be happening at all.
 clickhouse_managed_databases_service_start_wait_timeout_seconds: 15
 
+# Controls how many times (and how often) preparing the managed databases retries while ClickHouse cannot be connected to (e.g. while it is still starting).
+clickhouse_managed_databases_connection_retries: 10
+clickhouse_managed_databases_connection_retry_delay_seconds: 3
+
 clickhouse_systemd_services_to_stop_for_maintenance_list: []
 
 # Controls the `logger.level` configuration setting.
