@@ -57,7 +57,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `clickhouse_environment_variables_additional_variables` variable
   - Refer to [this page](https://clickhouse.com/docs/install/docker#configuration) for environment variables
-- [`templates/config.yaml.j2`](../templates/config.yaml.j2) for settings that you can customize via your `vars.yml` file with `clickhouse_config_additional_configurations`
+- [`templates/config.yaml.j2`](../templates/config.yaml.j2) for settings that you can customize via your `vars.yml` file with `clickhouse_config_extension_yaml`
   - Refer to [this page](https://clickhouse.com/docs/operations/server-configuration-parameters/settings) for a complete list of ClickHouse's config options
 
 ## Installing
