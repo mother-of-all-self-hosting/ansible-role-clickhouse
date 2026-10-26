@@ -10,13 +10,14 @@ SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
-{{ devture_systemd_docker_base_host_command_docker }} run \
-  -it \
-  --rm \
-  --user={{ clickhouse_uid }}:{{ clickhouse_gid }} \
-  --cap-drop=ALL \
-  --env-file={{ clickhouse_base_path }}/env \
-  --network={{ clickhouse_container_network }} \
-  --entrypoint=/bin/sh \
-  {{ clickhouse_container_image }} \
-  -c 'clickhouse-client --host={{ clickhouse_identifier }}'
+{#
+Runs the client inside the (running) ClickHouse container, which connects as the superuser
+defined by the container's own environment (`CLICKHOUSE_USER` and `CLICKHOUSE_PASSWORD`; see the `env` file).
+A TTY is only requested when there is one, so that queries can also be piped in (e.g. `echo 'SELECT 1' | cli`).
+#}
+docker_exec_args=(-i)
+if [ -t 0 ]; then
+  docker_exec_args+=(-t)
+fi
+
+exec {{ devture_systemd_docker_base_host_command_docker }} exec "${docker_exec_args[@]}" {{ clickhouse_identifier }} clickhouse-client "$@"

@@ -103,6 +103,23 @@
             fail_msg: "SELECT 1 returned {{ clickhouse_select_one.content | default('no output') }}"
             success_msg: "SELECT 1 returns 1"
 
+        # The helper script is what people reach for on the host. Piping a query
+        # into it (there is no TTY here) and passing it an argument covers both
+        # the non-interactive path and argument pass-through, and shows that the
+        # client inside the container logs in as the superuser.
+        - name: Run a query through the ClickHouse CLI helper script
+          ansible.builtin.command:
+            cmd: /clickhouse/bin/cli --format TSVRaw
+            stdin: SELECT currentUser()
+          register: clickhouse_cli_query
+          changed_when: false
+
+        - name: Assert the ClickHouse CLI helper script works
+          ansible.builtin.assert:
+            that: (clickhouse_cli_query.stdout | trim) == clickhouse_defaults.clickhouse_root_username
+            fail_msg: "The CLI helper script returned: {{ clickhouse_cli_query.stdout | default('') }} {{ clickhouse_cli_query.stderr | default('') }}"
+            success_msg: "The CLI helper script runs queries as {{ clickhouse_cli_query.stdout | trim }}"
+
         # The `backups` disk exists only because the role templated config.yaml and
         # ClickHouse loaded it. Without this probe, config.yaml could stop being
         # mounted (or stop being read) and everything else here would still pass,
@@ -233,6 +250,7 @@
               - "ClickHouse version: {{ clickhouse_version_reported.content | trim }}"
               - "ClickHouse HTTP /ping: {{ clickhouse_ping.content | trim }}"
               - "ClickHouse SELECT 1: {{ clickhouse_select_one.content | trim }}"
+              - "ClickHouse CLI helper: {{ clickhouse_cli_query.stdout | trim }}"
               - "ClickHouse disks: {{ clickhouse_disks.content.splitlines() | join(', ') }}"
               - "ClickHouse managed database round-trip: {{ clickhouse_managed_roundtrip.results[3].content | trim }}"
 

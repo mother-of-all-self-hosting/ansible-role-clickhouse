@@ -76,7 +76,7 @@ After running the command for installation, the Clickhouse instance becomes avai
 
 ### Getting a database terminal
 
-You can use the CLI installed to the directory specified with `clickhouse_bin_path` (default: `/clickhouse/bin/`) for getting interactive terminal access to the ClickHouse server.
+You can use the CLI installed to the directory specified with `clickhouse_bin_path` (default: `/clickhouse/bin/`) for getting interactive terminal access to the ClickHouse server (as the superuser). It runs `clickhouse-client` inside the running container and passes its arguments on to it, so it can also run a single query (e.g. `/clickhouse/bin/cli --query 'SHOW DATABASES'`).
 
 >[!WARNING]
 > Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption. If you are not perfectly sure, create a backup!
