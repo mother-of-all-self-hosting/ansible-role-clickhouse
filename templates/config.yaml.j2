@@ -14,11 +14,6 @@ query_thread_log:
   "@remove": remove
 {% endif %}
 
-{% if not clickhouse_config_query_thread_log_enabled %}
-query_thread_log:
-  "@remove": remove
-{% endif %}
-
 {% if not clickhouse_config_query_log_enabled %}
 query_log:
   "@remove": remove
