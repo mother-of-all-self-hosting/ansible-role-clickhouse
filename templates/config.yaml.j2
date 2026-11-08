@@ -39,6 +39,16 @@ asynchronous_metric_log:
   "@remove": remove
 {% endif %}
 
+{% if not clickhouse_config_part_log_enabled %}
+part_log:
+  "@remove": remove
+{% endif %}
+
+{% if not clickhouse_config_background_schedule_pool_log_enabled %}
+background_schedule_pool_log:
+  "@remove": remove
+{% endif %}
+
 storage_configuration:
   disks:
     backups:

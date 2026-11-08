@@ -186,6 +186,8 @@ clickhouse_config_text_log_enabled: "{{ clickhouse_config_verbose_logging_enable
 clickhouse_config_trace_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 clickhouse_config_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 clickhouse_config_asynchronous_metric_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_part_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
+clickhouse_config_background_schedule_pool_log_enabled: "{{ clickhouse_config_verbose_logging_enabled }}"
 
 # Default ClickHouse configuration template which covers the generic use case.
 # You can customize it by controlling the various variables inside it.
