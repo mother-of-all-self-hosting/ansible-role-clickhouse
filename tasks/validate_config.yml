@@ -20,10 +20,8 @@
       You need to define a required configuration setting (`{{ item }}`).
   when: "lookup('vars', item, default='') | string | length == 0"
   with_items:
-    - clickhouse_identifier
     - clickhouse_uid
     - clickhouse_gid
-    - clickhouse_container_network
     - clickhouse_root_password
 
 - name: Fail if ClickHouse logging level is invalid
